@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>二次元图库 · Visual Gallery</title>
+  <title>主人你好~欢迎访问范の导航页</title>
+  <!-- SVG favicon: cute pink flower -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23130025'/%3E%3Ccircle cx='32' cy='20' r='8' fill='%23ff85c0' opacity='.9'/%3E%3Ccircle cx='44' cy='27' r='8' fill='%23c8a8ff' opacity='.9'/%3E%3Ccircle cx='44' cy='41' r='8' fill='%23ff6b9d' opacity='.9'/%3E%3Ccircle cx='32' cy='48' r='8' fill='%23c8a8ff' opacity='.9'/%3E%3Ccircle cx='20' cy='41' r='8' fill='%23ff85c0' opacity='.9'/%3E%3Ccircle cx='20' cy='27' r='8' fill='%23ff6b9d' opacity='.9'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23f0c860'/%3E%3C/svg%3E"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -348,7 +350,7 @@
     <div class="intro-logo">✿</div>
   </div>
 
-  <div class="intro-title">Visual Gallery</div>
+  <div class="intro-title">范の导航页</div>
   <div class="intro-sub">二次元 · 精选图库 · 动漫美图</div>
 
   <div class="intro-bar-wrap">
@@ -360,8 +362,8 @@
 <!-- ===== MAIN PAGE ===== -->
 <div id="main">
   <div class="header">
-    <p class="eyebrow">Welcome to Visual Studio</p>
-    <h1>二次元 图库</h1>
+    <p class="eyebrow">欢迎来到范の小站</p>
+    <h1>范の导航页</h1>
     <div class="header-line"></div>
   </div>
 
@@ -384,7 +386,7 @@
     </a>
 
     <!-- OFFICIAL CARD -->
-    <a class="card card-official" href="#official" id="official-card">
+    <a class="card card-official" href="https://fannet.asia" target="_blank" rel="noopener" id="official-card">
       <div class="card-overlay" style="background:linear-gradient(to top,rgba(8,0,16,.99) 0%,rgba(8,0,16,.5) 55%,transparent 100%)"></div>
       <div class="card-content" style="text-align:center;align-items:center;display:flex;flex-direction:column;">
         <span class="official-orb">⬡</span>
@@ -400,7 +402,7 @@
 
   </div>
 
-  <div class="footer">© 2026 Visual Studio · All rights reserved</div>
+  <div class="footer">© 2026 范の小站 · fannet.asia · All rights reserved</div>
 </div>
 
 <script>
@@ -556,6 +558,38 @@ document.querySelectorAll('.card').forEach(card => {
   });
   card.addEventListener('mouseleave', () => { card.style.transform = ''; });
 });
+
+/* =========================================
+   TAB TITLE SWITCH
+========================================= */
+(function() {
+  const ACTIVE = '主人你好~欢迎访问范の导航页';
+  const AWAY = [
+    '不要离开我嘛 (´。＿。｀)',
+    '喵呜...主人去哪了？',
+    '人家等不住啦 >///<',
+    '快回来嘛！QAQ',
+    '主人是不是不要人家了...',
+    '( ´•︵•` ) 好寂寞...',
+    '呜呜，主人快回来！',
+  ];
+  let awayTimer = null;
+  let awayIdx = 0;
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      awayIdx = 0;
+      document.title = AWAY[awayIdx];
+      awayTimer = setInterval(() => {
+        awayIdx = (awayIdx + 1) % AWAY.length;
+        document.title = AWAY[awayIdx];
+      }, 2500);
+    } else {
+      clearInterval(awayTimer);
+      document.title = ACTIVE;
+    }
+  });
+})();
 </script>
 </body>
 </html>
