@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery &amp; Studio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #f0d080;
+      --gold-dim: #7a5e20;
+      --bg: #080a0f;
+      --glass: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.10);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+    }
+
+    /* ── Canvas background ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Radial glow blobs ── */
+    .glow-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0;
+      animation: blobFade 1.8s ease forwards;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-blob.b1 { width: 600px; height: 600px; background: radial-gradient(circle, #c9a84c33, transparent 70%); top: -100px; left: -100px; animation-delay: 0.3s; }
+    .glow-blob.b2 { width: 500px; height: 500px; background: radial-gradient(circle, #3344aa22, transparent 70%); bottom: -80px; right: -80px; animation-delay: 0.6s; }
+    .glow-blob.b3 { width: 400px; height: 400px; background: radial-gradient(circle, #c9a84c1a, transparent 70%); bottom: 20%; left: 30%; animation-delay: 0.9s; }
+    @keyframes blobFade { to { opacity: 1; } }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      padding: 24px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-40px);
+      animation: slideDown 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s forwards;
+    }
+    .header .eyebrow {
+      font-size: 11px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #fff 30%, var(--gold-light) 70%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+    .header .subtitle {
+      margin-top: 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 2px;
+    }
+    /* animated underline */
+    .header-line {
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 18px auto 0;
+      animation: lineExpand 1s ease 1.2s forwards;
+    }
+    @keyframes lineExpand { to { width: 240px; } }
+    @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Card grid ── */
+    .cards {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      opacity: 0;
+      transform: translateY(50px);
+      animation: slideUp 1s cubic-bezier(0.22,1,0.36,1) 0.8s forwards;
+    }
+    @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Single card ── */
+    .card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1),
+                  box-shadow 0.4s ease,
+                  border-color 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 340px;
+    }
+    .card:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.18);
+      border-color: rgba(201,168,76,0.4);
+    }
+
+    /* photo bg mosaic for gallery card */
+    .card-gallery .card-bg {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 3px;
+      opacity: 0.35;
+      transition: opacity 0.4s ease;
+    }
+    .card-gallery:hover .card-bg { opacity: 0.55; }
+    .card-bg-item {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      overflow: hidden;
+    }
+    .card-bg-item:nth-child(1) { background: linear-gradient(135deg,#2c1810,#5c3317); }
+    .card-bg-item:nth-child(2) { background: linear-gradient(135deg,#0d1b2a,#1b4332); }
+    .card-bg-item:nth-child(3) { background: linear-gradient(135deg,#1a1a2e,#2d1b69); }
+    .card-bg-item:nth-child(4) { background: linear-gradient(135deg,#2c2c54,#474787); }
+    .card-bg-item:nth-child(5) { background: linear-gradient(135deg,#1b2838,#2a475e); }
+    .card-bg-item:nth-child(6) { background: linear-gradient(135deg,#3d1a00,#7a3b00); }
+
+    /* shimmer sweep on hover */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .card:hover::after { opacity: 1; animation: shimmer 1.2s ease forwards; }
+    @keyframes shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(200%); }
+    }
+
+    /* gradient overlay */
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(8,10,15,0.95) 0%, rgba(8,10,15,0.5) 50%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* card content */
+    .card-content {
+      position: relative;
+      z-index: 2;
+      padding: 28px 28px 32px;
+    }
+    .card-tag {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--gold-dim);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      background: rgba(201,168,76,0.08);
+    }
+    .card-title {
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      transition: gap 0.3s ease;
+    }
+    .card:hover .card-cta { gap: 14px; }
+    .card-cta svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+    /* featured badge */
+    .badge-featured {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #080a0f;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* official card specific */
+    .card-official {
+      background: linear-gradient(160deg, rgba(30,30,60,0.6), rgba(10,10,20,0.8));
+      min-height: 340px;
+    }
+    .official-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+    }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 2px;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.4s forwards;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* ── Particle canvas ── */
+    /* handled via JS */
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: 1fr; max-width: 420px; }
+      .card, .card-official { min-height: 220px; }
+      .header h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- particle canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- glow blobs -->
+  <div class="glow-blob b1"></div>
+  <div class="glow-blob b2"></div>
+  <div class="glow-blob b3"></div>
+
+  <div class="page">
+
+    <!-- header -->
+    <div class="header">
+      <p class="eyebrow">Welcome</p>
+      <h1>Visual Studio</h1>
+      <p class="subtitle">Photography · Creation · Art</p>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- cards -->
+    <div class="cards">
+
+      <!-- Gallery card (main) -->
+      <a class="card card-gallery" href="#gallery" id="gallery-card">
+        <div class="card-bg">
+          <div class="card-bg-item"></div>
+          <div class="card-bg-item"></div>
+          <div class="card-bg-item"></div>
+          <div class="card-bg-item"></div>
+          <div class="card-bg-item"></div>
+          <div class="card-bg-item"></div>
+        </div>
+        <div class="card-overlay"></div>
+        <span class="badge-featured">主推</span>
+        <div class="card-content">
+          <span class="card-tag">Photo Gallery</span>
+          <h2 class="card-title">精选图库</h2>
+          <p class="card-desc">浏览精心策划的摄影作品集，记录光与影的瞬间之美。</p>
+          <div class="card-cta">
+            <span>进入图库</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Official site card -->
+      <a class="card card-official" href="#official" id="official-card">
+        <div class="card-overlay" style="background:linear-gradient(to top,rgba(8,10,15,0.98) 0%,rgba(8,10,15,0.4) 60%,transparent 100%)"></div>
+        <div class="card-content" style="text-align:center;align-items:center;display:flex;flex-direction:column;">
+          <span class="official-icon">✦</span>
+          <span class="card-tag">Official Site</span>
+          <h2 class="card-title" style="font-size:clamp(1.2rem,2.5vw,1.8rem);">官网</h2>
+          <p class="card-desc">了解我们的品牌故事与服务。</p>
+          <div class="card-cta" style="justify-content:center;">
+            <span>访问官网</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="footer">© 2026 Visual Studio · All rights reserved</div>
+  </div>
+
+  <script>
+    /* ── Particle system ── */
+    (function () {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const COUNT = 90;
+      const GOLD = [201, 168, 76];
+
+      function rand(a, b) { return a + Math.random() * (b - a); }
+
+      function createParticle() {
+        return {
+          x: rand(0, W),
+          y: rand(0, H),
+          r: rand(0.4, 1.8),
+          vx: rand(-0.15, 0.15),
+          vy: rand(-0.3, -0.05),
+          alpha: rand(0.1, 0.7),
+          decay: rand(0.001, 0.003),
+          gold: Math.random() > 0.6,
+        };
+      }
+
+      for (let i = 0; i < COUNT; i++) particles.push(createParticle());
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (const p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          const [r, g, b] = p.gold ? GOLD : [255, 255, 255];
+          ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha})`;
+          ctx.fill();
+
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= p.decay;
+
+          if (p.alpha <= 0 || p.y < -10) {
+            Object.assign(p, createParticle(), { y: H + 5, alpha: rand(0.1, 0.5) });
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ── Mouse parallax on cards ── */
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) / rect.width;
+        const dy = (e.clientY - cy) / rect.height;
+        card.style.transform = `translateY(-6px) scale(1.01) rotateX(${-dy * 4}deg) rotateY(${dx * 5}deg)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+
+    /* ── Placeholder: cards redirect (update hrefs when ready) ── */
+    document.getElementById('gallery-card').addEventListener('click', e => {
+      // update href to your gallery URL
+    });
+    document.getElementById('official-card').addEventListener('click', e => {
+      // update href to your official site URL
+    });
+  </script>
+</body>
+</html>
